@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>分K趨勢練習器</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">K</span>
+          <div>
+            <h1>分K趨勢練習器</h1>
+            <p id="dataStatus">讀取資料中</p>
+          </div>
+        </div>
+
+        <div class="market-controls">
+          <label>
+            <span>標的</span>
+            <select id="symbolSelect"></select>
+          </label>
+          <label>
+            <span>日期</span>
+            <select id="dateSelect"></select>
+          </label>
+          <div class="segmented" id="timeframeGroup" aria-label="timeframe">
+            <button data-timeframe="1m">1m</button>
+            <button data-timeframe="5m" class="active">5m</button>
+            <button data-timeframe="1h">1h</button>
+            <button data-timeframe="1D">1D</button>
+            <button data-timeframe="1M">1M</button>
+          </div>
+          <div class="custom-timeframe" aria-label="custom timeframe">
+            <input id="customTimeframeValue" inputmode="numeric" pattern="[0-9]*" placeholder="自訂" />
+            <select id="customTimeframeUnit" title="時間單位">
+              <option value="m">分</option>
+              <option value="h">時</option>
+              <option value="D">日</option>
+              <option value="W">週</option>
+              <option value="M">月</option>
+            </select>
+            <button id="customTimeframeBtn" class="mini-btn" type="button">套用</button>
+          </div>
+        </div>
+
+        <div class="replay-controls">
+          <button id="randomBtn" class="command">抽題</button>
+          <button id="resetBtn" class="icon-btn" title="回到開局">⏮</button>
+          <button id="stepBackBtn" class="icon-btn" title="上一根">‹</button>
+          <button id="playBtn" class="icon-btn primary" title="播放 / 暫停">▶</button>
+          <button id="stepForwardBtn" class="icon-btn" title="下一根">›</button>
+          <button id="fullViewBtn" class="icon-btn" title="顯示全部">⤢</button>
+          <select id="speedSelect" title="播放速度">
+            <option value="900">0.5x</option>
+            <option value="550" selected>1x</option>
+            <option value="250">2x</option>
+            <option value="90">5x</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="toolrail" aria-label="drawing tools">
+          <button class="tool active" data-tool="cursor" title="選取 / 拖曳">⌖</button>
+          <button class="tool" data-tool="hline" title="水平線">─</button>
+          <button class="tool" data-tool="trend" title="趨勢線">╱</button>
+          <button class="tool" data-tool="extend" title="延伸線">⟷</button>
+          <button class="tool" data-tool="channel" title="通道">▱</button>
+          <button class="tool" data-tool="range" title="文字區間">▭</button>
+          <button class="tool" data-tool="boxselect" title="匡選">□</button>
+          <button id="magnetToggleBtn" class="tool" title="磁鐵吸附">⌁</button>
+          <button id="deleteSelectedBtn" class="tool danger" title="刪除選取">⌫</button>
+          <button id="clearBtn" class="tool danger" title="清除全部標註">×</button>
+        </aside>
+
+        <section class="chart-panel">
+          <div class="chart-head">
+            <div class="ticker-line">
+              <strong id="chartTitle">--</strong>
+              <span id="chartSubtitle">--</span>
+            </div>
+          </div>
+          <section class="chart-indicator-panel">
+            <div class="section-title">
+              <h2>指標</h2>
+              <span>可疊多組</span>
+            </div>
+            <div class="chart-indicator-controls">
+              <div class="indicator-row">
+                <input id="smaPeriodInput" inputmode="numeric" value="20" />
+                <button id="addSmaBtn" class="mini-btn">加 SMA</button>
+              </div>
+              <div id="smaList" class="pill-list"></div>
+              <div class="indicator-list">
+                <div class="indicator-control" data-indicator-control="volume">
+                  <label><input type="checkbox" id="volumeToggle" checked /> Volume</label>
+                  <button type="button" data-indicator-move="volume:up" title="上移">↑</button>
+                  <button type="button" data-indicator-move="volume:down" title="下移">↓</button>
+                  <input type="range" min="48" max="180" value="76" data-pane-height="volume" title="調整高度" />
+                </div>
+                <div class="indicator-control" data-indicator-control="macd">
+                  <label><input type="checkbox" id="macdToggle" /> MACD</label>
+                  <button type="button" data-indicator-move="macd:up" title="上移">↑</button>
+                  <button type="button" data-indicator-move="macd:down" title="下移">↓</button>
+                  <input type="range" min="48" max="180" value="82" data-pane-height="macd" title="調整高度" />
+                </div>
+                <div class="indicator-control" data-indicator-control="kd">
+                  <label><input type="checkbox" id="kdToggle" /> KD</label>
+                  <button type="button" data-indicator-move="kd:up" title="上移">↑</button>
+                  <button type="button" data-indicator-move="kd:down" title="下移">↓</button>
+                  <input type="range" min="48" max="180" value="82" data-pane-height="kd" title="調整高度" />
+                </div>
+                <div class="indicator-control" data-indicator-control="rsi">
+                  <label><input type="checkbox" id="rsiToggle" /> RSI</label>
+                  <button type="button" data-indicator-move="rsi:up" title="上移">↑</button>
+                  <button type="button" data-indicator-move="rsi:down" title="下移">↓</button>
+                  <input type="range" min="48" max="180" value="76" data-pane-height="rsi" title="調整高度" />
+                </div>
+                <div class="indicator-control" data-indicator-control="cci">
+                  <label><input type="checkbox" id="cciToggle" /> CCI</label>
+                  <button type="button" data-indicator-move="cci:up" title="上移">↑</button>
+                  <button type="button" data-indicator-move="cci:down" title="下移">↓</button>
+                  <input type="range" min="48" max="180" value="76" data-pane-height="cci" title="調整高度" />
+                </div>
+                <div class="indicator-control compact" data-indicator-control="vwap">
+                  <label><input type="checkbox" id="vwapToggle" checked /> VWAP</label>
+                </div>
+              </div>
+            </div>
+          </section>
+          <div class="chart-shell" id="chartShell">
+            <canvas id="chartCanvas"></canvas>
+            <div id="crosshairTooltip" class="crosshair-tooltip hidden"></div>
+          </div>
+          <div class="chart-footer">
+            <input id="replaySlider" type="range" min="0" max="0" value="0" />
+            <div id="progressText">0 / 0</div>
+          </div>
+        </section>
+
+        <aside class="side-panel">
+          <section class="panel-section">
+            <div class="section-title">
+              <h2>交易計劃</h2>
+              <button id="newPlanBtn" class="mini-btn">新增</button>
+            </div>
+            <div id="portfolioStats" class="stats-grid"></div>
+            <div id="planList" class="plan-list"></div>
+            <button id="saveSessionBtn" class="save-btn">儲存目前練習</button>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-title">
+              <h2>教練視窗</h2>
+              <span>三種深度</span>
+            </div>
+            <div class="coach-actions">
+              <button class="mini-btn" data-coach-mode="quick">快速 · 5.4 mini</button>
+              <button class="mini-btn" data-coach-mode="standard">標準 · 5.4</button>
+              <button class="mini-btn" data-coach-mode="deep">深度 · 5.5</button>
+            </div>
+            <div class="offline-key-panel">
+              <input id="openaiKeyInput" type="password" autocomplete="off" placeholder="OpenAI API Key（只存在此裝置）" />
+              <button id="saveOpenaiKeyBtn" class="mini-btn" type="button">儲存 Key</button>
+              <button id="clearOpenaiKeyBtn" class="mini-btn" type="button">清除</button>
+            </div>
+            <div id="coachOutput" class="coach-output">
+              快速適合盤中即時修正；標準適合完整拆解；深度適合復盤。需設定 OPENAI_API_KEY。
+            </div>
+          </section>
+
+          <section class="panel-section history-section">
+            <div class="section-title">
+              <h2>練習紀錄</h2>
+              <span id="historyCount">0</span>
+            </div>
+            <div id="historyList" class="history-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="./app.js"></script>
+  <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+      }
+    </script>
+  </body>
+</html>
